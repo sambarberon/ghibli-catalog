@@ -1,0 +1,65 @@
+---
+import CaretLeft from '../icons/caret-left.svg'
+import FilmSlate from '../icons/film-slate.svg'
+import GitHub from '../icons/github.svg'
+
+interface Props {
+    back?: boolean;
+}
+
+const { back = false } = Astro.props
+const REPO = "https://github.com/sambarberon/ghibli-catalog"
+---
+
+<header class:list={{ floating: back}}>
+    {back? (
+        <a href="/" class="btn">
+            <CaretLeft aria-hidden="true" />
+            Back
+        </a>
+    ) : (
+        <a href="/" class="btn">
+            <FilmSlate aria-hidden="true" />
+            Ghibli Catalog
+        </a>
+    )}
+
+    <a
+        href={REPO}
+        class="btn"
+        aria-label="View source on GitHub"
+        target="_blank"
+        rel="noopener"
+    >
+        <GitHub aria-hidden="true" />
+    </a>
+</header>
+
+<style>
+    header {
+        padding: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .floating {
+        position: fixed;
+        inset: 0 0 auto;
+        z-index: 10;
+    }
+
+    .btn {
+        font-size: var(--size-s);
+    }
+
+    .btn :global(svg) {
+        width: var(--size-heading-3);
+        height: var(--size-heading-3);
+    }
+
+    .floating .btn {
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+    }
+</style>

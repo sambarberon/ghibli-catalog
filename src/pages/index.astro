@@ -1,17 +1,18 @@
 ---
+import BaseLayout from '../layouts/BaseLayout.astro'
+import Catalog from '../components/Catalog.astro'
+import { getFilms } from '../lib/ghibli';
 
+const films = await getFilms()
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<BaseLayout>
+    <div class="container">
+        <section class="hero">
+            <p lang="ja">株式会社スタジオジブリ</p>
+            <h1>Studio Ghibli Inc.</h1>
+            <p class="description">Japanese animation studio based in Koganei, Tokyo.</p>
+        </section>
+    </div>
+    <Catalog films={films} />
+</BaseLayout>

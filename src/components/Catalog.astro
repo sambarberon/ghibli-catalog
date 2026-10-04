@@ -1,0 +1,215 @@
+---
+import Card from '../components/Card.astro'
+import CaretDown from '../icons/caret-down.svg'
+import Funnel from '../icons/funnel.svg'
+import type { Film } from '../lib/ghibli';
+
+interface Props {
+    films: Film[];
+}
+
+const { films } = Astro.props
+
+const sorted = [...films].sort(
+    (a, b) => Number(b.release_date) - Number(a.release_date) || a.title.localeCompare(b.title)
+)
+
+const directors = [...new Set(films.map((film) => film.director))].sort()
+---
+
+<div class="toolbar">
+    <div class="select">
+        <select id="sort" class="btn" aria-label="Sort movies">
+            <option value="recent">Most recent</option>
+            <option value="rated">Best rated</option>
+            <option value="alpha">Alphabetical</option>
+        </select>
+        <CaretDown aria-hidden="true" />
+    </div>
+    <p id="count" class="count" aria-live="polite">{films.length} movies</p>
+    <button
+        id="filter-toggle"
+        class="btn"
+        type="button"
+        aria-label="Filter movies"
+        aria-expanded="false"
+        aria-controls="filters"
+    >
+        <Funnel aria-hidden="true" />
+        <span class="dot" hidden></span>
+    </button>
+</div>
+
+<div id="filters" class="filters" hidden>
+    <p class="filters-label">Director</p>
+    <div class="chips">
+        <button class="chip" type="button" data-director="" aria-pressed="true">All</button>
+        {directors.map((director) => (
+        <button class="chip" type="button" data-director={director} aria-pressed="false">
+            {director}
+        </button>
+        ))}
+    </div>
+</div>
+
+<ul id="grid" class="grid">
+    {sorted.map((film) => <Card film={film} />)}
+</ul>
+
+<script>
+    type Sorter = (a: HTMLElement, b:HTMLElement) => number
+
+    const grid = document.getElementById('grid')!
+    const items = [...grid.children] as HTMLElement[]
+    const sort = document.getElementById('sort') as HTMLSelectElement
+    const count = document.getElementById("count")!
+    const toggle = document.getElementById('filter-toggle')!
+    const panel = document.getElementById("filters")!
+    const dot = toggle.querySelector<HTMLElement>(".dot")!
+    const chips = [...panel.querySelectorAll<HTMLButtonElement>(".chip")]
+
+    let director = ""
+
+    const year = (el: HTMLElement) => Number(el.dataset.year)
+    const score = (el: HTMLElement) => Number(el.dataset.score)
+    const byTitle: Sorter = (a, b) => a.dataset.title!.localeCompare(b.dataset.title!)
+
+    const sorters: Record<string, Sorter> = {
+        recent: (a, b) => year(b) - year(a) || byTitle(a, b),
+        rated: (a, b) => score(b) - score(a) || year(b) - year(a),
+        alpha: byTitle,
+    }
+
+    function render() {
+        grid.append(...items.sort(sorters[sort.value]))
+
+        let visible = 0
+        for (const item of items) {
+            const show = !director || item.dataset.director === director
+            item.hidden = !show
+            if (show) visible++
+        }
+
+        count.textContent = `${visible} movie${visible > 1 ? "s" : ""}`
+        dot.hidden = !director
+    }
+
+    sort.addEventListener("change", render)
+
+    toggle.addEventListener("click", () => {
+        const open = panel.hidden;
+        panel.hidden = !open;
+        toggle.setAttribute("aria-expanded", String(open));
+    })
+
+    for (const chip of chips) {
+        chip.addEventListener("click", () => {
+            director = chip.dataset.director ?? "";
+            chips.forEach((c) => c.setAttribute("aria-pressed", String(c === chip)));
+            render();
+        });
+    }
+</script>
+
+<style>
+    /* Toolbar */
+    .toolbar {
+        padding: 0 1em;
+        display: flex;
+        align-items: center;
+        gap: 0.75em;
+    }
+
+    .btn {
+        font-size: var(--size-xs);
+    }
+
+    .btn :global(svg) {
+        width: var(--size-heading-5);
+        height: var(--size-heading-5);
+    }
+
+    .select {
+        position: relative;
+    }
+    
+    .select select {
+        appearance: none;
+        padding-right: 2em;
+    }
+
+    .select :global(svg) {
+        position: absolute;
+        right: 0.5em;
+        top: 50%;
+        width: var(--size-xs);
+        height: var(--size-xs);
+        transform: translateY(-50%);
+        pointer-events: none;
+    }
+
+    .count {
+        margin-left: auto;
+        font-size: var(--size-xs);
+        color: var(--white-40);
+    }
+
+    #filter-toggle {
+        position: relative;
+    }
+
+    .dot {
+        position: absolute;
+        top: 0.70em;
+        right: 0.35em;
+        width: 0.5em;
+        height: 0.5em;
+        border-radius: 50%;
+        background-color: red;
+    }
+
+    /* Filters */
+
+    .filters {
+        padding: 1rem;
+    }
+
+    .filters-label {
+        margin: 0 0 0.5em;
+        font-size: var(--size-s);
+        color: var(--white-40);
+    }
+
+    .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .chip {
+        padding: 0.5em 0.75em;
+        font: inherit;
+        color: inherit;
+        font-size: var(--size-s);
+        background: transparent;
+        border: 1px solid var(--white-10);
+        border-radius: var(--radius-s);
+        cursor: pointer;
+        transition: background-color 150ms, border-color 150ms;
+    }
+
+    .chip[aria-pressed="true"] {
+        background-color: var(--white-10);
+        border-color: transparent;
+    }
+
+    /* Grid */
+
+    .grid {
+        padding: 1em;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1em;
+        list-style: none;
+    }
+</style>

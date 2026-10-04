@@ -1,0 +1,87 @@
+---
+import ThumbsUp from '../icons/thumbs-up.svg'
+import { slugify, type Film } from '../lib/ghibli';
+
+interface Props {
+    film: Film
+}
+
+const { film } = Astro.props
+---
+
+<li
+    data-year={film.release_date}
+    data-score={film.rt_score}
+    data-title={film.title}
+    data-director={film.director}
+>
+    <a href={`/films/${slugify(film.title)}/`}>
+        <div class="poster">
+            <img src={film.image} alt="" width="300" height="450" loading="lazy" />
+            <span class="badge">
+                <ThumbsUp aria-hidden="true" />
+                {film.rt_score}% <span class="sr-only">positive reviews</span>
+            </span>
+        </div>
+        <div class="content">
+            <h2>{film.title}</h2>
+            <p>{film.release_date}</p>
+        </div>
+    </a>
+</li>
+
+<style>
+    a {
+        display: block;
+        color: inherit;
+        text-decoration: none;
+    }
+
+    .poster {
+        position: relative;
+    }
+
+    img {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 2 / 3;
+        object-fit: cover;
+        border-radius: var(--radius-m);
+    }
+
+    .badge {
+        padding: 0.5em;
+        position: absolute;
+        top: 0.5rem;
+        left: 0.5rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25em;
+        font-size: var(--size-xs);
+        border-radius: var(--radius-s);
+        background-color: var(--black-10);
+        -webkit-backdrop-filter: blur(16px);
+        backdrop-filter: blur(16px);
+    }
+
+    .badge :global(svg) {
+        width: var(--size-regular);
+        height: var(--size-regular);
+    }
+
+    .content {
+        padding: 0.5em;
+    }
+
+    h2, p {
+        font-size: var(--size-s);
+        line-height: var(--line-height-l);
+    }
+
+    p {
+        color: var(--white-60);
+    }
+</style>
+
+
+

@@ -1,0 +1,130 @@
+@font-face {
+  font-family: 'General Sans';
+  src: url('/fonts/generalsans-medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+
+  /* Font-size */
+  --size-heading-1: 2.027rem;
+  --size-heading-2: 1.802rem;
+  --size-heading-3: 1.602rem;
+  --size-heading-4: 1.424rem;
+  --size-heading-5: 1.266rem;
+  --size-heading-6: 1.125rem;
+  --size-regular: 1rem;
+  --size-s: 0.889rem;
+  --size-xs: 0.79rem;
+
+  /* Colors */
+  --black: oklch(0 0 0);
+  --black-10: oklch(0 0 0 / 10%);
+  --white: oklch(1 0 0);
+  --white-80: oklch(1 0 0 / 80%);
+  --white-60: oklch(1 0 0 / 60%);
+  --white-40: oklch(1 0 0 / 40%);
+  --white-10: oklch(1 0 0 / 10%);
+
+  /* Line-height */
+  --line-height-none: 1;
+  --line-height-s: 1.1;
+  --line-height-l: 1.5;
+
+  /* Border-radius */
+  --radius-s: 8px;
+  --radius-m: 12px;
+  
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'General Sans', system-ui, sans-serif;
+  font-weight: 500;
+  font-synthesis: none;
+  color: var(--white);
+  background-color: var(--black);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.container {
+  padding: 1em 1.5em;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5em;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Buttons */
+
+.btn {
+  padding: 0.5em;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25em;
+  font: inherit;
+  text-decoration: none;
+  color: var(--white);
+  background-color: var(--white-10);
+  border: 1px solid transparent;
+  border-radius: var(--radius-s);
+  cursor: pointer;
+  transition: background-color 150ms, border-color 150ms;
+}
+
+.btn:hover {
+  background-color: var(--black);
+  border-color: var(--white-10);
+}
+
+.btn svg {
+  flex-shrink: 0;
+}
+
+/* Hero */
+
+.hero {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75em;
+}
+
+:lang(ja) {
+  color: var(--white-60);
+  line-height: var(--line-height-none);
+  font-weight: bold;
+}
+
+h1 {
+  font-size: var(--size-heading-1);
+  line-height: var(--line-height-s);
+}
+
+.description {
+  color: var(--white-80);
+  line-height: var(--line-height-l);
+}
+
+/* Hidden */
+
+[hidden] {
+  display: none !important;
+}

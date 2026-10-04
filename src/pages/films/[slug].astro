@@ -1,0 +1,194 @@
+---
+import type { GetStaticPaths } from "astro";
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import ThumbsUp from '../../icons/thumbs-up.svg'
+import CaretDown from '../../icons/caret-down.svg'
+import { getFilms, slugify, type Film } from '../../lib/ghibli';
+
+export async function getStaticPaths() {
+    const films = await getFilms()
+
+    return films.map((film) => ({
+        params: { slug: slugify(film.title) },
+        props: {film},
+    }))
+}
+
+interface Props {
+    film: Film
+}
+
+const { film } = Astro.props
+
+const details = [
+    { label: "Director", value: film.director },
+    { label: "Producer", value: film.producer },
+    { label: "Running Time", value: `${film.running_time} min` },
+    { label: "Release Date", value: film.release_date },
+]
+---
+
+<BaseLayout title={`${film.title} | Ghibli Catalog`} description={film.description} back>
+    <div class="fade">
+        <img
+            class="poster"
+            src={film.image}
+            alt={`${film.title} poster`}
+            width="600"
+            height="900"
+            fetchpriority="high"
+        />
+    </div>
+    <div class="container">
+        <section class="hero">
+            <p lang="ja">{film.original_title}</p>
+            <h1>{film.title}</h1>
+            <p class="score">
+                <ThumbsUp aria-hidden="true" />
+                {film.rt_score}% <span class="sr-only">positive reviews</span>
+            </p>
+            <div class="synopsis">
+                <p id="synopsis__text" class="synopsis__text">{film.description}</p>
+                <button id="more" class="more" type="button" aria-expanded="false" aria-controls="synopsis" hidden>
+                    <span>Show more</span>
+                    <CaretDown aria-hidden="true" />
+                </button>
+            </div>
+        </section>
+        <dl>
+            {details.map(({ label, value }) => (
+                <div>
+                    <dt>{label}</dt>
+                    <dd>{value}</dd>
+                </div>
+            ))}
+        </dl>
+        <img
+            class="banner"
+            src={film.movie_banner}
+            alt=""
+            width="1280"
+            height="720"
+            loading="lazy"
+        />
+    </div>
+</BaseLayout>
+
+<script>
+    const synopsisText = document.getElementById('synopsis__text')!;
+    const more = document.getElementById('more') as HTMLButtonElement;
+    const label = more.querySelector('span')!;
+
+    if (synopsisText.scrollHeight > synopsisText.clientHeight + 1) {
+        more.hidden = false;
+
+        more.addEventListener('click', () => {
+        const open = synopsisText.classList.toggle('open');
+        more.setAttribute('aria-expanded', String(open));
+        label.textContent = open ? 'Show less' : 'Show more';
+        });
+    }
+</script>
+
+<style>
+    .fade {
+        position: relative;
+    }
+    .fade::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+            to bottom,
+            oklch(0 0 0 / 0.4) 0%,
+            oklch(0 0 0 / 0) 50%,
+            oklch(0 0 0 / 1) 100%
+        );
+        pointer-events: none;
+    }
+
+    .poster {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 2 / 3;
+        object-fit: cover;
+    }
+
+    .container {
+        position: relative;
+        margin-top: -4em;
+    }
+
+    .score {
+        display: flex;
+        align-items: center;
+        gap: 0.25em;
+        font-size: var(--size-s);
+    }
+
+    .score :global(svg) {
+        width: var(--size-regular);
+        height: var(--size-regular);
+    }
+
+    .synopsis__text {
+        line-height: var(--line-height-l);
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 3;
+        line-clamp: 3;
+        color: var(--white-80);
+        overflow: hidden;
+    }
+
+    .synopsis__text.open {
+        display: block;
+    }
+
+    .more {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25em;
+        font: inherit;
+        font-size: var(--size-xs);
+        color: var(--white-40);
+        background: none;
+        border: none;
+        cursor: pointer;
+    }
+
+    .more :global(svg) {
+        color: var(--white-40);
+        width: var(--size-xs);
+        height: var(--size-xs);
+        transition: transform 150ms;
+    }
+
+    .more[aria-expanded="true"] :global(svg) {
+        transform: rotate(180deg);
+    }
+
+    /* Movie infos */
+    dl div + div {
+        margin-top: 0.75em;
+    }
+
+    dt {
+        font-size: var(--size-s);
+        color: var(--white-40);
+    }
+
+    dt, dd {
+        line-height: var(--line-height-l);
+    }
+
+    /* Banner */
+    .banner {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 16 / 9;
+        object-fit: cover;
+        border-radius: var(--radius-m);
+    }
+
+</style>
